@@ -9,7 +9,7 @@ MICS6814 ::MICS6814(int pinCO, int pinNO2, int pinNH3)
 
 //  Calibrates MICS-6814 before use
 //
-//  Work algorithm:
+//  Algorithm:
 //
 //  Continuously measures resistance,
 //  with saving the last N measurements in the buffer.
