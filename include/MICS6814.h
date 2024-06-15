@@ -1,47 +1,48 @@
 #ifndef MICS6814_H
 #define MICS6814_H
 
+#define MOVING_AVERAGE_FILTER_SIZE 100
+#define SENSE_LOAD_RESISTANCE 51000 //ohms
+#define VCC 5.0 //V
+#define ADC_RESOLUTION 1023.0
+
 #include "Arduino.h"
 
-typedef enum
+typedef struct
 {
-	CH_CO,
-	CH_NO2,
-	CH_NH3
-} channel_t;
+	uint16_t CO;
+	uint16_t NO2;
+	uint16_t NH3;
+} gas_r0;
 
-typedef enum
+// struct to store moving average filter state
+typedef struct
 {
-	CO,
-	NO2,
-	NH3
-} gas_t;
+	gas_r0 *filterArray;
+	gas_r0 filterSum;
+	gas_r0 filterAverage;
+	uint16_t filterSize;
+	uint16_t filterIndex;
+} moving_average_filter;
 
 class MICS6814
 {
 public:
 	MICS6814(int pinCO, int pinNO2, int pinNH3);
 
-	void calibrate();
-	void loadCalibrationData(
-		uint16_t base_NH3,
-		uint16_t base_RED,
-		uint16_t base_OX);
+	void beginInitialCalibration();
+	void updateMovingAvgFilter();
 
-	float measure(gas_t gas);
-
-	uint16_t getResistance(channel_t channel) const;
-	uint16_t getBaseResistance(channel_t channel) const;
-	float getCurrentRatio(channel_t channel) const;
+	gas_r0 R0;
 
 private:
+	void _updateR0FromMovingAvgFilter();
+
 	uint8_t _pinCO;
 	uint8_t _pinNO2;
 	uint8_t _pinNH3;
 
-	uint16_t _baseNH3;
-	uint16_t _baseCO;
-	uint16_t _baseNO2;
+	moving_average_filter _moving_average_filter;
 };
 
 #endif
